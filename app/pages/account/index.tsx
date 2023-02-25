@@ -2,6 +2,7 @@ import { getSession, withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
+import { NavbarContainer } from '@containers/navbar-container';
 import { UserModel } from '@models/user';
 import { getUserByAuth0Id } from '@services/user/get';
 import Link from 'next/link';
@@ -19,7 +20,7 @@ export default function Account(props: AccountProps) {
   }
 
   return (
-    <React.Fragment>
+    <NavbarContainer>
       <DefaultHead title="AbsTracker | Account" />
 
       <MainContainer>
@@ -69,7 +70,7 @@ export default function Account(props: AccountProps) {
           </Link>
         </div>
       </MainContainer>
-    </React.Fragment>
+    </NavbarContainer>
   );
 }
 

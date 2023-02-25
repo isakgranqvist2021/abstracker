@@ -2,8 +2,12 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
 import { PropsWithChildren } from 'react';
 
-export function NavbarContainer(props: PropsWithChildren) {
-  const { children } = props;
+type NavbarContainerProps = PropsWithChildren<{
+  pageOptions?: { href: string; title: string };
+}>;
+
+export function NavbarContainer(props: NavbarContainerProps) {
+  const { children, pageOptions } = props;
 
   const { user } = useUser();
 
@@ -31,9 +35,15 @@ export function NavbarContainer(props: PropsWithChildren) {
           </div>
           <div className="flex-1 px-2 mx-2">
             <ul className="menu menu-horizontal">
-              <li>
-                <Link href={user ? '/account' : '/'}>AbsTracker</Link>
-              </li>
+              {pageOptions ? (
+                <li>
+                  <Link href={pageOptions.href}>{pageOptions.title}</Link>
+                </li>
+              ) : (
+                <li>
+                  <Link href={user ? '/account' : '/'}>AbsTracker</Link>
+                </li>
+              )}
             </ul>
           </div>
           <div className="flex-none hidden lg:block">

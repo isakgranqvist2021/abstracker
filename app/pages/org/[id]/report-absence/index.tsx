@@ -3,6 +3,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
+import { NavbarContainer } from '@containers/navbar-container';
 import React from 'react';
 
 export default function ReportAbsence() {
@@ -13,7 +14,7 @@ export default function ReportAbsence() {
   }
 
   return (
-    <React.Fragment>
+    <NavbarContainer>
       <DefaultHead title="AbsTracker | Report Absence" />
 
       <MainContainer>
@@ -21,7 +22,7 @@ export default function ReportAbsence() {
           <PageTitle className="text-center">Report Absence</PageTitle>
         </div>
       </MainContainer>
-    </React.Fragment>
+    </NavbarContainer>
   );
 }
 

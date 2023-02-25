@@ -3,6 +3,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
+import { NavbarContainer } from '@containers/navbar-container';
 import { OrgModel } from '@models/org';
 import { useRouter } from 'next/router';
 import React, { createRef } from 'react';
@@ -80,7 +81,7 @@ export default function CreateOrg() {
   };
 
   return (
-    <React.Fragment>
+    <NavbarContainer>
       <DefaultHead title="AbsTracker | Create organization" />
 
       <MainContainer>
@@ -112,7 +113,7 @@ export default function CreateOrg() {
           </form>
         </div>
       </MainContainer>
-    </React.Fragment>
+    </NavbarContainer>
   );
 }
 
