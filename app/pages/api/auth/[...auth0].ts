@@ -5,6 +5,7 @@ import {
   handleLogin,
 } from '@auth0/nextjs-auth0';
 import { LoggerService } from '@services/logger';
+import { createUser } from '@services/user/create';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 function onError(req: NextApiRequest, res: NextApiResponse, error: Error) {
@@ -14,8 +15,13 @@ function onError(req: NextApiRequest, res: NextApiResponse, error: Error) {
 async function callback(req: NextApiRequest, res: NextApiResponse) {
   try {
     await handleCallback(req, res, {
-      afterCallback: (req, res, session) => {
-        console.log(session.user);
+      afterCallback: async (req, res, session) => {
+        await createUser({
+          createdAt: Date.now(),
+          email: session.user.email,
+          id: session.user.sub,
+          name: session.user.name,
+        });
 
         return session;
       },

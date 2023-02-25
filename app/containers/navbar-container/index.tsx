@@ -29,7 +29,13 @@ export function NavbarContainer(props: PropsWithChildren) {
               </svg>
             </label>
           </div>
-          <div className="flex-1 px-2 mx-2">AbsTracker</div>
+          <div className="flex-1 px-2 mx-2">
+            <ul className="menu menu-horizontal">
+              <li>
+                <Link href={user ? '/account' : '/'}>AbsTracker</Link>
+              </li>
+            </ul>
+          </div>
           <div className="flex-none hidden lg:block">
             <ul className="menu menu-horizontal">
               <li>

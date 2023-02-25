@@ -1,3 +1,4 @@
+import { getSession } from '@auth0/nextjs-auth0';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
