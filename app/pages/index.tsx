@@ -1,24 +1,16 @@
-import { useUser } from '@auth0/nextjs-auth0/client';
 import { DefaultHead } from '@components/default-head';
-import Link from 'next/link';
+import { PageTitle } from '@components/page-title';
+import { MainContainer } from '@containers/main-container';
 import React from 'react';
 
 export default function Home() {
-  const { user, isLoading } = useUser();
-
   return (
     <React.Fragment>
       <DefaultHead title="AbsTracker | Home" />
 
-      <main>
-        <h1>Welcome to AbsTracker!</h1>
-
-        {!user ? (
-          <Link href="/api/auth/login">Login</Link>
-        ) : (
-          <Link href="/account">Account</Link>
-        )}
-      </main>
+      <MainContainer>
+        <PageTitle>Welcome to AbsTracker!</PageTitle>
+      </MainContainer>
     </React.Fragment>
   );
 }

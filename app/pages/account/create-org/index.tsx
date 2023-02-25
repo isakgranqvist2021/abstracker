@@ -3,10 +3,9 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
-import Link from 'next/link';
 import React from 'react';
 
-export default function Account() {
+export default function CreateOrg() {
   const { user } = useUser();
 
   if (!user) {
@@ -15,20 +14,11 @@ export default function Account() {
 
   return (
     <React.Fragment>
-      <DefaultHead title="AbsTracker | Account" />
+      <DefaultHead title="AbsTracker | Create organisation" />
 
       <MainContainer>
         <div className="flex flex-col items-center justify-center grow gap-10">
-          <PageTitle className="text-center">Welcome, {user.name}</PageTitle>
-
-          <p className="text-center max-w-prose">
-            You are not in an organisation. Ask your organisation administrator
-            to add you to an organisation. Or create your own organisation.
-          </p>
-
-          <Link href="/account/create-org" className="btn btn-primary">
-            Create an organisation
-          </Link>
+          <PageTitle className="text-center">Create new organisation</PageTitle>
         </div>
       </MainContainer>
     </React.Fragment>
@@ -36,5 +26,5 @@ export default function Account() {
 }
 
 export const getServerSideProps = withPageAuthRequired({
-  returnTo: '/account',
+  returnTo: '/account/create-org',
 });

@@ -1,4 +1,9 @@
-import { handleAuth, handleCallback, handleLogin } from '@auth0/nextjs-auth0';
+import {
+  getSession,
+  handleAuth,
+  handleCallback,
+  handleLogin,
+} from '@auth0/nextjs-auth0';
 import { LoggerService } from '@services/logger';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -10,6 +15,8 @@ async function callback(req: NextApiRequest, res: NextApiResponse) {
   try {
     await handleCallback(req, res, {
       afterCallback: (req, res, session) => {
+        console.log(session.user);
+
         return session;
       },
     });
