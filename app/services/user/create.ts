@@ -15,7 +15,7 @@ export async function createUser(
     );
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw new Error('Internal server error');
     }
 
     const id = auth0IdToToString(options.id);
@@ -23,7 +23,7 @@ export async function createUser(
     const userId = await getUserIdByAuth0Id(id);
 
     if (typeof userId === 'string') {
-      return { error: 'User already exists' };
+      throw new Error('User already exists');
     }
 
     const result = await collection.insertOne({

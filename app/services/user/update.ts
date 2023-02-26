@@ -12,7 +12,7 @@ export async function joinOrg(
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      return null;
+      throw new Error('Collection not found');
     }
 
     const result = await collection.findOneAndUpdate(
@@ -21,7 +21,7 @@ export async function joinOrg(
     );
 
     if (!result.value) {
-      return null;
+      throw new Error('User not found');
     }
 
     return result.value._id.toHexString();

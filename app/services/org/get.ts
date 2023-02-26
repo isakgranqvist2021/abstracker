@@ -17,13 +17,15 @@ export async function getOrganizationById(
     // TODO - check if user is allowed to access this org
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw collection;
     }
 
     const result = await collection.findOne({ _id });
 
+    console.log({ result });
+
     if (!result) {
-      return { error: 'Organization not found' };
+      throw result;
     }
 
     const members: OrgModel['members'] = [];
@@ -69,19 +71,29 @@ export async function getOrganizationById(
 export async function getOrganizations(
   orgIds: BSON.ObjectId[]
 ): Promise<OrgModel[]> {
-  const orgs = await Promise.all(orgIds.map(getOrganizationById));
+  try {
+    const orgs = await Promise.all(orgIds.map(getOrganizationById));
 
-  return orgs.filter((org): org is OrgModel => org !== null);
+    return orgs.filter((org): org is OrgModel => org !== null);
+  } catch (err) {
+    LoggerService.log('error', err);
+    return [];
+  }
 }
 
 export async function getOrgNameById(
   orgId: BSON.ObjectId
 ): Promise<string | DatabaseError> {
-  const org = await getOrganizationById(orgId);
+  try {
+    const org = await getOrganizationById(orgId);
 
-  if ('error' in org) {
-    return { error: 'Organization not found' };
+    if ('error' in org) {
+      throw org;
+    }
+
+    return org.name;
+  } catch (err) {
+    LoggerService.log('error', err);
+    return { error: 'Internal server error' };
   }
-
-  return org.name;
 }

@@ -14,7 +14,7 @@ export async function createOrganization(
     );
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw new Error('Internal server error');
     }
 
     const result = await collection.insertOne({

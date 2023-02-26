@@ -4,10 +4,16 @@ import {
   CreateInvitationDocument,
   CreateInvitationOptions,
 } from './invitation.types';
+import { resendInvitation } from './update';
 import { getCollection } from '@lib/mongodb';
 import { DatabaseError } from '@models/error';
 import { LoggerService } from '@services/logger';
+import { userIsMemberOfOrg } from '@services/user/get';
 import { ObjectId } from 'mongodb';
+
+async function sendInvitationEmail(recipientEmail: string, orgId: ObjectId) {
+  // TODO: Send email
+}
 
 export async function createInvitation(
   options: CreateInvitationOptions
@@ -18,7 +24,7 @@ export async function createInvitation(
     );
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw collection;
     }
 
     const orgId = new ObjectId(options.orgId);
@@ -29,8 +35,40 @@ export async function createInvitation(
       orgId
     );
 
-    if (invitationExists && invitationExists > 0) {
-      return { error: 'Invitation already exists' };
+    if ('error' in invitationExists) {
+      throw invitationExists;
+    }
+
+    const isAlreadyMemberOfOrg = await userIsMemberOfOrg(recipientEmail, orgId);
+
+    if (typeof isAlreadyMemberOfOrg !== 'boolean') {
+      throw isAlreadyMemberOfOrg;
+    }
+
+    if (isAlreadyMemberOfOrg) {
+      throw new Error('User is already a member of this org');
+    }
+
+    if (invitationExists.pendingInvitations > 0) {
+      throw new Error(
+        `pendingInvitations: ${invitationExists.pendingInvitations}`
+      );
+    }
+
+    if (invitationExists.declinedInvitations > 0) {
+      const result = await resendInvitation({
+        orgId,
+        recipientEmail,
+        expirationDate: options.expirationDate,
+      });
+
+      if (typeof result !== 'string') {
+        throw result;
+      }
+
+      await sendInvitationEmail(recipientEmail, orgId);
+
+      return result;
     }
 
     const result = await collection.insertOne({
@@ -43,7 +81,7 @@ export async function createInvitation(
       updatedAt: null,
     });
 
-    // TODO - send an email to the recipientEmail
+    await sendInvitationEmail(recipientEmail, orgId);
 
     return result.insertedId.toHexString();
   } catch (err) {

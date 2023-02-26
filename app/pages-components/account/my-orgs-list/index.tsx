@@ -9,7 +9,7 @@ function renderOrgListItem(org: UserModel['orgs'][number]) {
   return (
     <li
       className="first-of-type:rounded-t-md last-of-type:rounded-b-md hover:bg-base-200 cursor-pointer"
-      key={org._id}
+      key={`my-org-${org._id}`}
     >
       <Link
         href={`/org/${org._id}`}
@@ -37,6 +37,8 @@ function renderOrgListItem(org: UserModel['orgs'][number]) {
 
 export function MyOrgsList(props: MyOrgsListProps) {
   const { orgs } = props;
+
+  console.log(orgs);
 
   return (
     <ul role="list" className="border w-80 rounded-md divide-y">

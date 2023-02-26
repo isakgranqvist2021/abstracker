@@ -10,20 +10,35 @@ import { ObjectId } from 'mongodb';
 export async function invitationExistsWithSameRecipientAndOrgId(
   recipientEmail: string,
   orgId: ObjectId
-): Promise<number | DatabaseError> {
+): Promise<
+  | {
+      pendingInvitations: number;
+      declinedInvitations: number;
+    }
+  | DatabaseError
+> {
   try {
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw new Error('Internal server error');
     }
 
-    return collection.countDocuments({
+    const pendingInvitations = await collection.countDocuments({
       recipientEmail,
       orgId,
+      status: 'pending',
     });
+
+    const declinedInvitations = await collection.countDocuments({
+      recipientEmail,
+      orgId,
+      status: 'declined',
+    });
+
+    return { pendingInvitations, declinedInvitations };
   } catch (err) {
     LoggerService.log('error', err);
     return { error: 'Internal server error' };
@@ -39,7 +54,7 @@ export async function getInvitationsByEmail(
     );
 
     if (!collection) {
-      return { error: 'Internal server error' };
+      throw new Error('Internal server error');
     }
 
     const invitations = await collection

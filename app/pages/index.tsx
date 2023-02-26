@@ -1,5 +1,4 @@
 import { DefaultHead } from '@components/default-head';
-import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
 import { NavbarContainer } from '@containers/navbar-container';
 import { BenefitsSection } from '@pages-components/home/benefits-section';

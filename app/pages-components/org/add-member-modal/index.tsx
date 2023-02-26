@@ -1,5 +1,5 @@
 import { InvitationModel } from '@models/invitation';
-import React, { createRef } from 'react';
+import React, { createRef, useRef } from 'react';
 
 type CreateInvitationPayload = Pick<
   InvitationModel,
@@ -12,6 +12,8 @@ interface AddMemberModalProps {
 
 export function AddMemberModal(props: AddMemberModalProps) {
   const { orgId } = props;
+
+  const checkboxRef = useRef<HTMLInputElement>(null);
 
   const refs: Record<keyof CreateInvitationPayload, any> = {
     expirationDate: createRef<HTMLInputElement>(),
@@ -42,13 +44,24 @@ export function AddMemberModal(props: AddMemberModalProps) {
     const res = await createInvitation(formData);
 
     if (res.status === 200) {
-      console.log('Invitation sent!');
+      window.alert('Invitation sent!');
+
+      if (checkboxRef.current) {
+        checkboxRef.current.checked = false;
+      }
+    } else {
+      window.alert('Something went wrong.');
     }
   };
 
   return (
     <React.Fragment>
-      <input type="checkbox" id="add-member-modal" className="modal-toggle" />
+      <input
+        className="modal-toggle"
+        id="add-member-modal"
+        ref={checkboxRef}
+        type="checkbox"
+      />
 
       <label htmlFor="add-member-modal" className="modal cursor-pointer">
         <label className="modal-box relative" htmlFor="">
