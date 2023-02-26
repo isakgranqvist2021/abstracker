@@ -7,6 +7,7 @@ import {
 import { resendInvitation } from './update';
 import { getCollection } from '@lib/mongodb';
 import { LoggerService } from '@services/logger';
+import { getOrgAdminIdByOrgId } from '@services/org/get';
 import { userIsMemberOfOrg } from '@services/user/get';
 import { ObjectId } from 'mongodb';
 
@@ -14,20 +15,22 @@ async function sendInvitationEmail(recipientEmail: string, orgId: ObjectId) {
   // TODO: Send email
 }
 
-export async function createInvitation(
-  options: CreateInvitationOptions
-): Promise<string | Error> {
+async function validateOrResendInvitation(
+  recipientEmail: string,
+  orgId: ObjectId,
+  sentById: ObjectId,
+  expirationDate: number
+): Promise<string | void | Error> {
   try {
-    const collection = await getCollection<CreateInvitationDocument>(
-      INVITATIONS_COLLECTION_NAME
-    );
+    const adminId = await getOrgAdminIdByOrgId(orgId);
 
-    if (!collection) {
-      throw new Error('Invitations collection not found');
+    if (adminId instanceof Error) {
+      throw adminId;
     }
 
-    const orgId = new ObjectId(options.orgId);
-    const recipientEmail = options.recipientEmail;
+    if (adminId !== sentById.toHexString()) {
+      throw new Error('Only administrators can send invitations');
+    }
 
     const invitationExists = await invitationExistsWithSameRecipientAndOrgId(
       recipientEmail,
@@ -58,7 +61,7 @@ export async function createInvitation(
       const result = await resendInvitation({
         orgId,
         recipientEmail,
-        expirationDate: options.expirationDate,
+        expirationDate,
       });
 
       if (result instanceof Error) {
@@ -68,6 +71,39 @@ export async function createInvitation(
       await sendInvitationEmail(recipientEmail, orgId);
 
       return result;
+    }
+
+    return;
+  } catch (err) {
+    LoggerService.log('error', err);
+    return err instanceof Error ? err : new Error('Internal server error');
+  }
+}
+
+export async function createInvitation(
+  options: CreateInvitationOptions
+): Promise<string | Error> {
+  try {
+    const collection = await getCollection<CreateInvitationDocument>(
+      INVITATIONS_COLLECTION_NAME
+    );
+
+    const orgId = new ObjectId(options.orgId);
+    const recipientEmail = options.recipientEmail;
+
+    const isAllowed = await validateOrResendInvitation(
+      recipientEmail,
+      orgId,
+      options.sentBy,
+      options.expirationDate
+    );
+
+    if (isAllowed instanceof Error) {
+      throw isAllowed;
+    }
+
+    if (typeof isAllowed === 'string') {
+      return isAllowed;
     }
 
     const result = await collection.insertOne({

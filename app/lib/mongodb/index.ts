@@ -29,15 +29,9 @@ if (NODE_ENV === 'development') {
 export async function getCollection<T extends Document>(
   collectionName: string
 ) {
-  try {
-    const client = await clientPromise;
-    const collection = client.db().collection<T>(collectionName);
+  const client = await clientPromise;
 
-    return collection;
-  } catch (err) {
-    LoggerService.log('error', err);
-    return null;
-  }
+  return client.db().collection<T>(collectionName);
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a

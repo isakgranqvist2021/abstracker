@@ -5,19 +5,13 @@ import { OrgModel } from '@models/org';
 import { LoggerService } from '@services/logger';
 import { USERS_COLLECTION_NAME } from '@services/user/user.constants';
 import { UserDocument } from '@services/user/user.types';
-import { BSON } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 export async function getOrganizationById(
-  _id: BSON.ObjectId
+  _id: ObjectId
 ): Promise<OrgModel | Error> {
   try {
     const collection = await getCollection<OrgDocument>(ORG_COLLECTION_NAME);
-
-    // TODO - check if user is allowed to access this org
-
-    if (!collection) {
-      throw new Error('Org collection not found');
-    }
 
     const result = await collection.findOne({ _id });
 
@@ -66,21 +60,20 @@ export async function getOrganizationById(
 }
 
 export async function getOrganizations(
-  orgIds: BSON.ObjectId[]
-): Promise<OrgModel[]> {
+  orgIds: ObjectId[],
+  userId: ObjectId
+): Promise<OrgModel[] | Error> {
   try {
     const orgs = await Promise.all(orgIds.map(getOrganizationById));
 
     return orgs.filter((org): org is OrgModel => org !== null);
   } catch (err) {
     LoggerService.log('error', err);
-    return [];
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
-export async function getOrgNameById(
-  orgId: BSON.ObjectId
-): Promise<string | Error> {
+export async function getOrgNameById(orgId: ObjectId): Promise<string | Error> {
   try {
     const org = await getOrganizationById(orgId);
 
@@ -89,6 +82,23 @@ export async function getOrgNameById(
     }
 
     return org.name;
+  } catch (err) {
+    LoggerService.log('error', err);
+    return err instanceof Error ? err : new Error('Internal server error');
+  }
+}
+
+export async function getOrgAdminIdByOrgId(
+  orgId: ObjectId
+): Promise<string | Error> {
+  try {
+    const org = await getOrganizationById(orgId);
+
+    if (org instanceof Error) {
+      throw org;
+    }
+
+    return org.adminId;
   } catch (err) {
     LoggerService.log('error', err);
     return err instanceof Error ? err : new Error('Internal server error');

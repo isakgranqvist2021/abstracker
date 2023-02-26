@@ -13,10 +13,6 @@ export async function createUser(
       USERS_COLLECTION_NAME
     );
 
-    if (!collection) {
-      throw new Error('User collection not found');
-    }
-
     const id = auth0IdToToString(options.id);
 
     const userId = await getUserIdByAuth0Id(id);

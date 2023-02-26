@@ -12,10 +12,6 @@ export async function createOrganization(
       ORG_COLLECTION_NAME
     );
 
-    if (!collection) {
-      throw new Error('Org collection not found');
-    }
-
     const result = await collection.insertOne({
       adminId: options.adminId,
       createdAt: Date.now(),

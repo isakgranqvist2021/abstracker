@@ -1,10 +1,12 @@
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { BreadCrumb, BreadCrumbs } from '@components/breadcrumbs';
 import { DefaultHead } from '@components/default-head';
 import { PageTitle } from '@components/page-title';
 import { MainContainer } from '@containers/main-container';
 import { NavbarContainer } from '@containers/navbar-container';
 import { OrgModel } from '@models/org';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { createRef } from 'react';
 
@@ -74,7 +76,7 @@ export default function CreateOrg() {
     if (res.status === 200) {
       const data: { orgId: string } = await res.json();
 
-      router.replace(`/org/${data.orgId}`);
+      router.replace(`/account/org/${data.orgId}`);
 
       return;
     }
@@ -83,6 +85,12 @@ export default function CreateOrg() {
   return (
     <NavbarContainer>
       <DefaultHead title="AbsTracker | Create organization" />
+
+      <BreadCrumbs>
+        <BreadCrumb href="/">Home</BreadCrumb>
+        <BreadCrumb href="/account">Account</BreadCrumb>
+        <BreadCrumb href="/account/create-org">Create Org</BreadCrumb>
+      </BreadCrumbs>
 
       <MainContainer className="p-5">
         <div className="flex flex-col items-center justify-center grow gap-10">

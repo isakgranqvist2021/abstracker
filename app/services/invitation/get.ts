@@ -1,5 +1,8 @@
 import { INVITATIONS_COLLECTION_NAME } from './invitation.constants';
-import { CreateInvitationDocument } from './invitation.types';
+import {
+  CreateInvitationDocument,
+  InvitationDocument,
+} from './invitation.types';
 import { getCollection } from '@lib/mongodb';
 import { InvitationModel } from '@models/invitation';
 import { LoggerService } from '@services/logger';
@@ -16,10 +19,6 @@ export async function invitationExistsWithSameRecipientAndOrgId(
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
-
-    if (!collection) {
-      throw new Error('Invitations collection not found');
-    }
 
     const pendingInvitations = await collection.countDocuments({
       recipientEmail,
@@ -40,6 +39,29 @@ export async function invitationExistsWithSameRecipientAndOrgId(
   }
 }
 
+async function invitationMapper(
+  invitation: InvitationDocument
+): Promise<InvitationModel | null> {
+  const orgName = await getOrgNameById(invitation.orgId);
+
+  if (typeof orgName !== 'string') {
+    LoggerService.log('error', 'orgName is null');
+    return null;
+  }
+
+  return {
+    _id: invitation._id.toHexString(),
+    createdAt: invitation.createdAt,
+    expirationDate: invitation.expirationDate,
+    name: orgName,
+    orgId: invitation.orgId.toHexString(),
+    recipientEmail: invitation.recipientEmail,
+    sentBy: invitation.sentBy.toHexString(),
+    status: 'pending',
+    updatedAt: invitation.updatedAt,
+  };
+}
+
 export async function getInvitationsByEmail(
   recipientEmail: string
 ): Promise<InvitationModel[] | Error> {
@@ -47,10 +69,6 @@ export async function getInvitationsByEmail(
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
-
-    if (!collection) {
-      throw new Error('Invitations collection not found');
-    }
 
     const invitations = await collection
       .find({
@@ -60,26 +78,7 @@ export async function getInvitationsByEmail(
       .toArray();
 
     const invitationModels = await Promise.all(
-      invitations.map(async (invitation): Promise<InvitationModel | null> => {
-        const orgName = await getOrgNameById(invitation.orgId);
-
-        if (typeof orgName !== 'string') {
-          LoggerService.log('error', 'orgName is null');
-          return null;
-        }
-
-        return {
-          _id: invitation._id.toHexString(),
-          createdAt: invitation.createdAt,
-          expirationDate: invitation.expirationDate,
-          name: orgName,
-          orgId: invitation.orgId.toHexString(),
-          recipientEmail: invitation.recipientEmail,
-          sentBy: invitation.sentBy.toHexString(),
-          status: 'pending',
-          updatedAt: invitation.updatedAt,
-        };
-      })
+      invitations.map(invitationMapper)
     );
 
     return invitationModels.filter(

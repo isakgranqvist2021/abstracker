@@ -1,4 +1,5 @@
 import { getSession, withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { BreadCrumb, BreadCrumbs } from '@components/breadcrumbs';
 import { DefaultHead } from '@components/default-head';
 import { MainContainer } from '@containers/main-container';
 import { NavbarContainer } from '@containers/navbar-container';
@@ -8,7 +9,7 @@ import { HoursAwayChart } from '@pages-components/org/hours-away-chart';
 import { MembersAvatarGroup } from '@pages-components/org/members-avatar-group';
 import { MemberTable } from '@pages-components/org/members-table';
 import { getOrganizationById } from '@services/org/get';
-import { getUserIdByAuth0Id } from '@services/user/get';
+import { getUserByAuth0Id } from '@services/user/get';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,6 +22,7 @@ import {
   Legend,
 } from 'chart.js';
 import { ObjectId } from 'mongodb';
+import { GetServerSidePropsResult } from 'next';
 import Link from 'next/link';
 import React from 'react';
 
@@ -50,15 +52,23 @@ export default function Org(props: OrgProps) {
   const members = org.members;
 
   return (
-    <NavbarContainer pageOptions={{ title: org.name, href: `/org/${org._id}` }}>
+    <NavbarContainer
+      pageOptions={{ title: org.name, href: `/account/org/${org._id}` }}
+    >
       <DefaultHead title="AbsTracker | Org Name" />
+
+      <BreadCrumbs>
+        <BreadCrumb href="/">Home</BreadCrumb>
+        <BreadCrumb href="/account">Account</BreadCrumb>
+        <BreadCrumb href={`/account/org/${org._id}`}>{org.name}</BreadCrumb>
+      </BreadCrumbs>
 
       <MainContainer>
         <div className="flex grow overflow-hidden">
           <AddMemberModal orgId={org._id} />
 
           <div className="grow flex flex-col">
-            <div className="flex justify-between gap-5 bg-base-200 p-5 min-h-fit overflow-hidden items-center">
+            <div className="flex justify-between gap-5 bg-neutral-content p-5 min-h-fit overflow-hidden items-center">
               {org.adminId === userId && (
                 <label
                   htmlFor="add-member-modal"
@@ -82,12 +92,7 @@ export default function Org(props: OrgProps) {
                 </label>
               )}
 
-              <Link
-                href={`/org/${org._id}/report-absence`}
-                className="btn btn-primary gap-2"
-              >
-                Report absence
-              </Link>
+              <button className="btn btn-primary gap-2">Report absence</button>
               <MembersAvatarGroup members={members} />
             </div>
 
@@ -107,33 +112,37 @@ export default function Org(props: OrgProps) {
 
 export const getServerSideProps = withPageAuthRequired({
   returnTo: '/account',
-  getServerSideProps: async (context): Promise<{ props: OrgProps }> => {
-    if (!context.params?.id || Array.isArray(context.params.id)) {
-      context.res.writeHead(302, { Location: '/account' });
-      return { props: { org: null, userId: null } };
+  getServerSideProps: async (
+    ctx
+  ): Promise<GetServerSidePropsResult<OrgProps>> => {
+    if (!ctx.params?.id || Array.isArray(ctx.params.id)) {
+      return { redirect: { destination: '/account', permanent: false } };
     }
 
-    const session = await getSession(context.req, context.res);
+    const session = await getSession(ctx.req, ctx.res);
 
     if (!session) {
-      context.res.writeHead(302, { Location: '/account' });
-      return { props: { org: null, userId: null } };
+      return { redirect: { destination: '/account', permanent: false } };
     }
 
-    const org = await getOrganizationById(new ObjectId(context.params.id));
+    const user = await getUserByAuth0Id(session.user.sub);
+
+    if (user instanceof Error) {
+      return { redirect: { destination: '/account', permanent: false } };
+    }
+
+    const org = await getOrganizationById(new ObjectId(ctx.params.id));
 
     if (org instanceof Error) {
-      context.res.writeHead(302, { Location: '/account' });
-      return { props: { org: null, userId: null } };
+      return { redirect: { destination: '/account', permanent: false } };
     }
 
-    const userId = await getUserIdByAuth0Id(session.user.sub);
+    const userOrgIds = new Set(user.orgs.map((org) => org._id.toString()));
 
-    if (userId instanceof Error) {
-      context.res.writeHead(302, { Location: '/account' });
-      return { props: { org: null, userId: null } };
+    if (!userOrgIds.has(org._id.toString())) {
+      return { redirect: { destination: '/account', permanent: false } };
     }
 
-    return { props: { org, userId } };
+    return { props: { org, userId: user._id } };
   },
 });

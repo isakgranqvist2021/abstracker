@@ -14,10 +14,6 @@ export async function getUserByAuth0Id(
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
-    if (!collection) {
-      throw new Error('User collection not found');
-    }
-
     const result = await collection.findOne({
       id: auth0IdToToString(auth0Id),
     });
@@ -51,10 +47,6 @@ export async function getUserIdByAuth0Id(
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
-    if (!collection) {
-      throw new Error('User collection not found');
-    }
-
     const result = await collection.findOne({
       id: auth0IdToToString(auth0Id),
     });
@@ -76,10 +68,6 @@ export async function userIsMemberOfOrg(
 ): Promise<boolean | Error> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
-
-    if (!collection) {
-      throw new Error('User collection not found');
-    }
 
     const result = await collection.findOne({
       email: recipientEmail,

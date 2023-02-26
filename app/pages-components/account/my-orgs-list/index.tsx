@@ -12,7 +12,7 @@ function renderOrgListItem(org: UserModel['orgs'][number]) {
       key={`my-org-${org._id}`}
     >
       <Link
-        href={`/org/${org._id}`}
+        href={`/account/org/${org._id}`}
         className="p-3 flex justify-between items-center"
       >
         <span className="whitespace-nowrap">{org.name}</span>

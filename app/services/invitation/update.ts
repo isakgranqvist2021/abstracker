@@ -1,7 +1,6 @@
 import { INVITATIONS_COLLECTION_NAME } from './invitation.constants';
 import {
   CreateInvitationDocument,
-  InvitationDocument,
   ResendInvitationOptions,
   UpdateInvitationOptions,
 } from './invitation.types';
@@ -14,31 +13,25 @@ export async function updateInvitationStatus(
   options: UpdateInvitationOptions
 ): Promise<void | Error> {
   try {
-    const { _id, status, userId } = options;
-
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
 
-    if (!collection) {
-      throw new Error(
-        'Could not get collection from database in updateInvitationStatus'
-      );
-    }
-
     const updateResult = await collection.updateOne(
-      { _id: new ObjectId(_id) },
-      { $set: { status, updatedAt: Date.now() } }
+      { _id: new ObjectId(options._id) },
+      { $set: { status: options.status, updatedAt: Date.now() } }
     );
 
-    const invitation = await collection.findOne({ _id: new ObjectId(_id) });
+    const invitation = await collection.findOne({
+      _id: new ObjectId(options._id),
+    });
 
     if (!invitation) {
       throw new Error('Could not find invitation in updateInvitationStatus');
     }
 
     if (status === 'accepted') {
-      const result = await joinOrg(userId, invitation.orgId);
+      const result = await joinOrg(options.userId, invitation.orgId);
 
       if (typeof result === 'string') {
         return;
@@ -71,12 +64,6 @@ export async function resendInvitation(
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
-
-    if (!collection) {
-      throw new Error(
-        'Could not get collection from database in resendInvitation'
-      );
-    }
 
     const updateResult = await collection.findOneAndUpdate(
       { orgId: new ObjectId(orgId), recipientEmail },

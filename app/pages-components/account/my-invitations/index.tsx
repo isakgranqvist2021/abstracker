@@ -28,7 +28,7 @@ function InvitationListItem(props: InvitationModel) {
     setIsLoading(false);
 
     if (res.status === 200) {
-      router.push(`/org/${orgId}`);
+      router.push(`/account/org/${orgId}`);
       return;
     }
   };

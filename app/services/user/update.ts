@@ -11,10 +11,6 @@ export async function joinOrg(
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
-    if (!collection) {
-      throw new Error('User collection not found');
-    }
-
     const result = await collection.findOneAndUpdate(
       { _id },
       { $push: { orgs: { _id: orgId, createdAt: Date.now() } } }

@@ -1,10 +1,39 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
-import { PropsWithChildren } from 'react';
+import { useRouter } from 'next/router';
+import React, { PropsWithChildren } from 'react';
 
 type NavbarContainerProps = PropsWithChildren<{
   pageOptions?: { href: string; title: string };
 }>;
+
+function SignedInListItems() {
+  return (
+    <React.Fragment>
+      <li>
+        <Link href="/account">My Account</Link>
+      </li>
+
+      <li>
+        <Link href="/account/create-org">Create Organization</Link>
+      </li>
+
+      <li>
+        <Link href="/api/auth/logout">Logout</Link>
+      </li>
+    </React.Fragment>
+  );
+}
+
+function SignedOutListItems() {
+  return (
+    <React.Fragment>
+      <li>
+        <Link href="/api/auth/login">Login</Link>
+      </li>
+    </React.Fragment>
+  );
+}
 
 export function NavbarContainer(props: NavbarContainerProps) {
   const { children, pageOptions } = props;
@@ -46,15 +75,25 @@ export function NavbarContainer(props: NavbarContainerProps) {
               )}
             </ul>
           </div>
-          <div className="flex-none hidden lg:block">
-            <ul className="menu menu-horizontal">
-              <li>
-                {user ? (
-                  <Link href="/api/auth/logout">Logout</Link>
-                ) : (
-                  <Link href="/api/auth/login">Login</Link>
-                )}
-              </li>
+
+          <div className="dropdown dropdown-end lg:block hidden">
+            <label tabIndex={0} className="btn btn-ghost">
+              Account
+              <svg
+                className="fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+              >
+                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+              </svg>
+            </label>
+            <ul
+              tabIndex={0}
+              className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              {user ? <SignedInListItems /> : <SignedOutListItems />}
             </ul>
           </div>
         </div>
@@ -65,13 +104,7 @@ export function NavbarContainer(props: NavbarContainerProps) {
       <div className="drawer-side">
         <label htmlFor="main-nav" className="drawer-overlay"></label>
         <ul className="menu p-4 w-80 bg-base-100">
-          <li>
-            {user ? (
-              <Link href="/api/auth/logout">Logout</Link>
-            ) : (
-              <Link href="/api/auth/login">Login</Link>
-            )}
-          </li>
+          {user ? <SignedInListItems /> : <SignedOutListItems />}
         </ul>
       </div>
     </div>
