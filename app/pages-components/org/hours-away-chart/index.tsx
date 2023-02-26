@@ -59,21 +59,9 @@ const data = {
 };
 
 const options: ChartOptions<'bar' | 'line'> = {
-  plugins: {
-    title: {
-      display: true,
-      text: 'Total Hours Away - Month & Day',
-    },
-  },
+  plugins: { title: { display: true, text: 'Total Hours Away - Month & Day' } },
   responsive: true,
-  scales: {
-    x: {
-      stacked: true,
-    },
-    y: {
-      stacked: true,
-    },
-  },
+  scales: { x: { stacked: true }, y: { stacked: true } },
 };
 
 export function HoursAwayChart() {
