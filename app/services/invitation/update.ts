@@ -30,7 +30,7 @@ export async function updateInvitationStatus(
       throw new Error('Could not find invitation in updateInvitationStatus');
     }
 
-    if (status === 'accepted') {
+    if (options.status === 'accepted') {
       const result = await joinOrg(options.userId, invitation.orgId);
 
       if (typeof result === 'string') {

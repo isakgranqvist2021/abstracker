@@ -87,8 +87,7 @@ export default function CreateOrg() {
       <DefaultHead title="AbsTracker | Create organization" />
 
       <BreadCrumbs>
-        <BreadCrumb href="/">Home</BreadCrumb>
-        <BreadCrumb href="/account">Account</BreadCrumb>
+        <BreadCrumb href="/account">Home</BreadCrumb>
         <BreadCrumb href="/account/create-org">Create Org</BreadCrumb>
       </BreadCrumbs>
 
@@ -109,10 +108,13 @@ export default function CreateOrg() {
             className="flex flex-col gap-10 w-full items-center"
           >
             <input
+              aria-required
               className="input input-bordered w-full max-w-xs"
               id="name"
+              pattern="^[\w\s]{1,50}$"
               placeholder="My organization"
               ref={refs.name}
+              required
               type="text"
             />
 

@@ -58,8 +58,7 @@ export default function Org(props: OrgProps) {
       <DefaultHead title="AbsTracker | Org Name" />
 
       <BreadCrumbs>
-        <BreadCrumb href="/">Home</BreadCrumb>
-        <BreadCrumb href="/account">Account</BreadCrumb>
+        <BreadCrumb href="/account">Home</BreadCrumb>
         <BreadCrumb href={`/account/org/${org._id}`}>{org.name}</BreadCrumb>
       </BreadCrumbs>
 
