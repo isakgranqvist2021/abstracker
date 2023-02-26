@@ -71,7 +71,7 @@ export function AddMemberModal(props: AddMemberModalProps) {
               </div>
 
               <div className="flex flex-col gap-2">
-                <span>Expiration date</span>
+                <span className="label-text">Expiration date</span>
                 <input
                   className="input input-bordered"
                   id="expiration-date"

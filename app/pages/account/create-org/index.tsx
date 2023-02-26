@@ -84,7 +84,7 @@ export default function CreateOrg() {
     <NavbarContainer>
       <DefaultHead title="AbsTracker | Create organization" />
 
-      <MainContainer>
+      <MainContainer className="p-5">
         <div className="flex flex-col items-center justify-center grow gap-10">
           <PageTitle className="text-center">Create new organization</PageTitle>
 

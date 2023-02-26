@@ -10,26 +10,31 @@ const data = {
       label: 'Monday',
       data: [0, 1, 2, 3, 4, 5, 6],
       backgroundColor: 'rgb(0, 25, 60)',
+      barThickness: 20,
     },
     {
       label: 'Tuesday',
       data: [0, 1, 2, 3, 4, 5, 6],
       backgroundColor: 'rgb(123, 146, 178)',
+      barThickness: 20,
     },
     {
       label: 'Wednesday',
       data: [0, 1, 2, 3, 4, 5, 6],
       backgroundColor: 'rgb(103, 203, 160)',
+      barThickness: 20,
     },
     {
       label: 'Thursday',
       data: [0, 1, 2, 3, 4, 5, 6],
       backgroundColor: 'rgb(24, 26, 42)',
+      barThickness: 20,
     },
     {
       label: 'Friday',
       data: [0, 1, 2, 3, 4, 5, 6],
       backgroundColor: 'rgb(75, 107, 251)',
+      barThickness: 20,
     },
   ],
 };

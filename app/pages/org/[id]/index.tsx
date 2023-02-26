@@ -49,7 +49,7 @@ export default function Org(props: OrgProps) {
     <NavbarContainer pageOptions={{ title: org.name, href: `/org/${org._id}` }}>
       <DefaultHead title="AbsTracker | Org Name" />
 
-      <MainContainer className="p-0">
+      <MainContainer>
         <div className="flex grow overflow-hidden">
           <AddMemberModal orgId={org._id} />
 

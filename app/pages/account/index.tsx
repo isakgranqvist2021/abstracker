@@ -28,7 +28,7 @@ export default function Account(props: AccountProps) {
     <NavbarContainer>
       <DefaultHead title="AbsTracker | Account" />
 
-      <MainContainer>
+      <MainContainer className="p-5">
         <div className="flex flex-col items-center justify-center grow gap-10">
           <PageTitle className="text-center">Welcome, {user.name}</PageTitle>
 
