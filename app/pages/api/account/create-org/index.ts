@@ -20,8 +20,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const userId = await getUserIdByAuth0Id(session.user.sub);
 
-  if (typeof userId === 'object') {
-    return res.status(500).end('Internal Server Error');
+  if (userId instanceof Error) {
+    return res.status(500).end(userId.message);
   }
 
   const lastInsertedId = await createOrganization({
@@ -31,8 +31,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     updatedAt: null,
   });
 
-  if (!lastInsertedId) {
-    return res.status(500).end('Internal Server Error');
+  if (lastInsertedId instanceof Error) {
+    return res.status(500).end(lastInsertedId.message);
   }
 
   return res.status(200).json({

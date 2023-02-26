@@ -2,20 +2,19 @@ import { getUserIdByAuth0Id } from './get';
 import { USERS_COLLECTION_NAME } from './user.constants';
 import { CreateUserDocument, CreateUserOptions } from './user.types';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { LoggerService } from '@services/logger';
 import { auth0IdToToString } from '@utils';
 
 export async function createUser(
   options: CreateUserOptions
-): Promise<string | DatabaseError> {
+): Promise<string | Error> {
   try {
     const collection = await getCollection<CreateUserDocument>(
       USERS_COLLECTION_NAME
     );
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('User collection not found');
     }
 
     const id = auth0IdToToString(options.id);
@@ -40,6 +39,6 @@ export async function createUser(
     return result.insertedId.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

@@ -6,7 +6,6 @@ import {
 } from './invitation.types';
 import { resendInvitation } from './update';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { LoggerService } from '@services/logger';
 import { userIsMemberOfOrg } from '@services/user/get';
 import { ObjectId } from 'mongodb';
@@ -17,14 +16,14 @@ async function sendInvitationEmail(recipientEmail: string, orgId: ObjectId) {
 
 export async function createInvitation(
   options: CreateInvitationOptions
-): Promise<string | DatabaseError> {
+): Promise<string | Error> {
   try {
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
 
     if (!collection) {
-      throw collection;
+      throw new Error('Invitations collection not found');
     }
 
     const orgId = new ObjectId(options.orgId);
@@ -35,14 +34,14 @@ export async function createInvitation(
       orgId
     );
 
-    if ('error' in invitationExists) {
+    if (invitationExists instanceof Error) {
       throw invitationExists;
     }
 
     const isAlreadyMemberOfOrg = await userIsMemberOfOrg(recipientEmail, orgId);
 
-    if (typeof isAlreadyMemberOfOrg !== 'boolean') {
-      throw isAlreadyMemberOfOrg;
+    if (isAlreadyMemberOfOrg instanceof Error) {
+      throw new Error('Internal server error');
     }
 
     if (isAlreadyMemberOfOrg) {
@@ -51,7 +50,7 @@ export async function createInvitation(
 
     if (invitationExists.pendingInvitations > 0) {
       throw new Error(
-        `pendingInvitations: ${invitationExists.pendingInvitations}`
+        'An invitation has already been sent to this user for this org'
       );
     }
 
@@ -62,7 +61,7 @@ export async function createInvitation(
         expirationDate: options.expirationDate,
       });
 
-      if (typeof result !== 'string') {
+      if (result instanceof Error) {
         throw result;
       }
 
@@ -86,6 +85,6 @@ export async function createInvitation(
     return result.insertedId.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

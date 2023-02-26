@@ -6,14 +6,13 @@ import {
   UpdateInvitationOptions,
 } from './invitation.types';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { LoggerService } from '@services/logger';
 import { joinOrg } from '@services/user/update';
 import { ObjectId } from 'mongodb';
 
 export async function updateInvitationStatus(
   options: UpdateInvitationOptions
-): Promise<void | DatabaseError> {
+): Promise<void | Error> {
   try {
     const { _id, status, userId } = options;
 
@@ -59,13 +58,13 @@ export async function updateInvitationStatus(
     return;
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
 export async function resendInvitation(
   options: ResendInvitationOptions
-): Promise<string | DatabaseError> {
+): Promise<string | Error> {
   try {
     const { orgId, recipientEmail, expirationDate } = options;
 
@@ -91,6 +90,6 @@ export async function resendInvitation(
     return updateResult.value._id.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

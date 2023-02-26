@@ -1,7 +1,6 @@
 import { ORG_COLLECTION_NAME } from './org.constants';
 import { OrgDocument } from './org.types';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { OrgModel } from '@models/org';
 import { LoggerService } from '@services/logger';
 import { USERS_COLLECTION_NAME } from '@services/user/user.constants';
@@ -10,22 +9,20 @@ import { BSON } from 'mongodb';
 
 export async function getOrganizationById(
   _id: BSON.ObjectId
-): Promise<OrgModel | DatabaseError> {
+): Promise<OrgModel | Error> {
   try {
     const collection = await getCollection<OrgDocument>(ORG_COLLECTION_NAME);
 
     // TODO - check if user is allowed to access this org
 
     if (!collection) {
-      throw collection;
+      throw new Error('Org collection not found');
     }
 
     const result = await collection.findOne({ _id });
 
-    console.log({ result });
-
     if (!result) {
-      throw result;
+      throw new Error('Org not found');
     }
 
     const members: OrgModel['members'] = [];
@@ -64,7 +61,7 @@ export async function getOrganizationById(
     };
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
@@ -83,17 +80,17 @@ export async function getOrganizations(
 
 export async function getOrgNameById(
   orgId: BSON.ObjectId
-): Promise<string | DatabaseError> {
+): Promise<string | Error> {
   try {
     const org = await getOrganizationById(orgId);
 
-    if ('error' in org) {
+    if (org instanceof Error) {
       throw org;
     }
 
     return org.name;
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

@@ -122,14 +122,14 @@ export const getServerSideProps = withPageAuthRequired({
 
     const org = await getOrganizationById(new ObjectId(context.params.id));
 
-    if ('error' in org) {
+    if (org instanceof Error) {
       context.res.writeHead(302, { Location: '/account' });
       return { props: { org: null, userId: null } };
     }
 
     const userId = await getUserIdByAuth0Id(session.user.sub);
 
-    if (typeof userId === 'object') {
+    if (userId instanceof Error) {
       context.res.writeHead(302, { Location: '/account' });
       return { props: { org: null, userId: null } };
     }

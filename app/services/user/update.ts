@@ -7,12 +7,12 @@ import { BSON } from 'mongodb';
 export async function joinOrg(
   _id: BSON.ObjectId,
   orgId: BSON.ObjectId
-): Promise<string | null> {
+): Promise<string | Error> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      throw new Error('Collection not found');
+      throw new Error('User collection not found');
     }
 
     const result = await collection.findOneAndUpdate(
@@ -27,6 +27,7 @@ export async function joinOrg(
     return result.value._id.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return null;
+
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

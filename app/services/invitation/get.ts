@@ -1,7 +1,6 @@
 import { INVITATIONS_COLLECTION_NAME } from './invitation.constants';
 import { CreateInvitationDocument } from './invitation.types';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { InvitationModel } from '@models/invitation';
 import { LoggerService } from '@services/logger';
 import { getOrgNameById } from '@services/org/get';
@@ -11,11 +10,7 @@ export async function invitationExistsWithSameRecipientAndOrgId(
   recipientEmail: string,
   orgId: ObjectId
 ): Promise<
-  | {
-      pendingInvitations: number;
-      declinedInvitations: number;
-    }
-  | DatabaseError
+  { pendingInvitations: number; declinedInvitations: number } | Error
 > {
   try {
     const collection = await getCollection<CreateInvitationDocument>(
@@ -23,7 +18,7 @@ export async function invitationExistsWithSameRecipientAndOrgId(
     );
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('Invitations collection not found');
     }
 
     const pendingInvitations = await collection.countDocuments({
@@ -41,20 +36,20 @@ export async function invitationExistsWithSameRecipientAndOrgId(
     return { pendingInvitations, declinedInvitations };
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
 export async function getInvitationsByEmail(
   recipientEmail: string
-): Promise<InvitationModel[] | DatabaseError> {
+): Promise<InvitationModel[] | Error> {
   try {
     const collection = await getCollection<CreateInvitationDocument>(
       INVITATIONS_COLLECTION_NAME
     );
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('Invitations collection not found');
     }
 
     const invitations = await collection
@@ -92,6 +87,6 @@ export async function getInvitationsByEmail(
     ) as InvitationModel[];
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

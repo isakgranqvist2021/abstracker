@@ -1,7 +1,6 @@
 import { USERS_COLLECTION_NAME } from './user.constants';
 import { UserDocument } from './user.types';
 import { getCollection } from '@lib/mongodb';
-import { DatabaseError } from '@models/error';
 import { OrgModel } from '@models/org';
 import { UserModel } from '@models/user';
 import { LoggerService } from '@services/logger';
@@ -11,12 +10,12 @@ import { ObjectId } from 'mongodb';
 
 export async function getUserByAuth0Id(
   auth0Id: string
-): Promise<UserModel | DatabaseError> {
+): Promise<UserModel | Error> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('User collection not found');
     }
 
     const result = await collection.findOne({
@@ -42,18 +41,18 @@ export async function getUserByAuth0Id(
     };
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
 export async function getUserIdByAuth0Id(
   auth0Id: string
-): Promise<string | DatabaseError> {
+): Promise<string | Error> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('User collection not found');
     }
 
     const result = await collection.findOne({
@@ -67,19 +66,19 @@ export async function getUserIdByAuth0Id(
     return result._id.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }
 
 export async function userIsMemberOfOrg(
   recipientEmail: string,
   orgId: ObjectId
-): Promise<boolean | DatabaseError> {
+): Promise<boolean | Error> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      throw new Error('Internal server error');
+      throw new Error('User collection not found');
     }
 
     const result = await collection.findOne({
@@ -94,6 +93,6 @@ export async function userIsMemberOfOrg(
     return true;
   } catch (err) {
     LoggerService.log('error', err);
-    return { error: 'Internal server error' };
+    return err instanceof Error ? err : new Error('Internal server error');
   }
 }

@@ -67,14 +67,14 @@ export const getServerSideProps = withPageAuthRequired({
 
     const user = await getUserByAuth0Id(session.user.sub);
 
-    if ('error' in user) {
+    if (user instanceof Error) {
       ctx.res.writeHead(302, { Location: '/' });
       return { props: { user: null, invitations: null } };
     }
 
     const invitations = await getInvitationsByEmail(user.email);
 
-    if ('error' in invitations) {
+    if (invitations instanceof Error) {
       ctx.res.writeHead(302, { Location: '/' });
       return { props: { user: null, invitations: null } };
     }

@@ -24,9 +24,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const orgId = req.query.id;
-  const userId = await getUserIdByAuth0Id(session.user.sub);
 
-  if (typeof orgId !== 'string' || typeof userId !== 'string') {
+  if (!orgId || typeof orgId !== 'string') {
+    return res.status(400).end('Bad Request');
+  }
+
+  const userId = await getUserIdByAuth0Id(session.user.sub);
+  if (userId instanceof Error) {
     return res.status(500).end('Internal Server Error');
   }
 
@@ -37,8 +41,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     sentBy: new ObjectId(userId),
   });
 
-  if (typeof lastInsertedId === 'object' && 'error' in lastInsertedId) {
-    return res.status(400).end(lastInsertedId.error);
+  if (lastInsertedId instanceof Error) {
+    return res.status(400).end(lastInsertedId.message);
   }
 
   return res.status(200).json({

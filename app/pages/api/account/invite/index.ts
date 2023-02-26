@@ -20,8 +20,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const userId = await getUserIdByAuth0Id(session.user.sub);
 
-  if (typeof userId !== 'string') {
-    return res.status(500).end('Internal Server Error');
+  if (userId instanceof Error) {
+    return res.status(500).end(userId.message);
   }
 
   const updateInvitationResult = await updateInvitationStatus({
@@ -29,8 +29,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     userId: new ObjectId(userId),
   });
 
-  if (typeof updateInvitationResult === 'object') {
-    return res.status(400).end(updateInvitationResult.error);
+  if (updateInvitationResult instanceof Error) {
+    return res.status(400).end(updateInvitationResult.message);
   }
 
   return res.status(200).end('OK');
