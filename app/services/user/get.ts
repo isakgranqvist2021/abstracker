@@ -1,6 +1,7 @@
 import { USERS_COLLECTION_NAME } from './user.constants';
 import { UserDocument } from './user.types';
 import { getCollection } from '@lib/mongodb';
+import { DatabaseError } from '@models/error';
 import { OrgModel } from '@models/org';
 import { UserModel } from '@models/user';
 import { LoggerService } from '@services/logger';
@@ -9,12 +10,12 @@ import { auth0IdToToString } from '@utils';
 
 export async function getUserByAuth0Id(
   auth0Id: string
-): Promise<UserModel | null> {
+): Promise<UserModel | DatabaseError> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      return null;
+      return { error: 'Internal server error' };
     }
 
     const result = await collection.findOne({
@@ -22,7 +23,7 @@ export async function getUserByAuth0Id(
     });
 
     if (!result) {
-      return null;
+      return { error: 'User not found' };
     }
 
     const userOrgs = await Promise.all(
@@ -40,18 +41,18 @@ export async function getUserByAuth0Id(
     };
   } catch (err) {
     LoggerService.log('error', err);
-    return null;
+    return { error: 'Internal server error' };
   }
 }
 
 export async function getUserIdByAuth0Id(
   auth0Id: string
-): Promise<string | null> {
+): Promise<string | DatabaseError> {
   try {
     const collection = await getCollection<UserDocument>(USERS_COLLECTION_NAME);
 
     if (!collection) {
-      return null;
+      return { error: 'Internal server error' };
     }
 
     const result = await collection.findOne({
@@ -59,12 +60,12 @@ export async function getUserIdByAuth0Id(
     });
 
     if (!result) {
-      return null;
+      return { error: 'User not found' };
     }
 
     return result._id.toHexString();
   } catch (err) {
     LoggerService.log('error', err);
-    return null;
+    return { error: 'Internal server error' };
   }
 }

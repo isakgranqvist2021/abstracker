@@ -8,6 +8,8 @@ import { OrgModel } from '@models/org';
 import { useRouter } from 'next/router';
 import React, { createRef } from 'react';
 
+type CreateOrgApiPayload = Pick<OrgModel, 'name'>;
+
 function createOrganization(data: CreateOrgApiPayload) {
   return fetch('/api/account/create-org', {
     method: 'POST',
@@ -42,8 +44,6 @@ function ListItem(props: React.PropsWithChildren) {
     </li>
   );
 }
-
-type CreateOrgApiPayload = Pick<OrgModel, 'name'>;
 
 export default function CreateOrg() {
   const router = useRouter();
@@ -101,10 +101,11 @@ export default function CreateOrg() {
             className="flex flex-col gap-10 w-full items-center"
           >
             <input
+              className="input input-bordered w-full max-w-xs"
+              id="name"
+              placeholder="My organization"
               ref={refs.name}
               type="text"
-              placeholder="My organization"
-              className="input input-bordered w-full max-w-xs"
             />
 
             <button className="btn btn-primary" type="submit">

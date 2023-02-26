@@ -4,7 +4,7 @@ interface MembersAvatarGroupProps {
   members: OrgModel['members'];
 }
 
-export function MembersAvatarGroup(props: MembersGroupProps) {
+export function MembersAvatarGroup(props: MembersAvatarGroupProps) {
   const { members } = props;
 
   return (

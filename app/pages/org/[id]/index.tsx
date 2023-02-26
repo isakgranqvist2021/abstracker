@@ -43,17 +43,7 @@ export default function Org(props: OrgProps) {
     return null;
   }
 
-  const members: {
-    _id: string;
-    email: string;
-    joinedDate: number | null;
-    name: string;
-  }[] = Array.from(new Array(100)).map((_, i) => ({
-    _id: i.toString(),
-    email: 'example@gmail.com',
-    joinedDate: Date.now(),
-    name: `Member ${i}`,
-  }));
+  const members = org.members;
 
   return (
     <NavbarContainer pageOptions={{ title: org.name, href: `/org/${org._id}` }}>
@@ -61,7 +51,7 @@ export default function Org(props: OrgProps) {
 
       <MainContainer className="p-0">
         <div className="flex grow overflow-hidden">
-          <AddMemberModal />
+          <AddMemberModal orgId={org._id} />
 
           <div className="grow flex flex-col">
             <div className="flex justify-between gap-5 bg-base-200 p-5 min-h-fit overflow-hidden items-center">
@@ -88,28 +78,18 @@ export default function Org(props: OrgProps) {
                 </label>
               )}
 
+              <Link
+                href={`/org/${org._id}/report-absence`}
+                className="btn btn-primary gap-2"
+              >
+                Report absence
+              </Link>
               <MembersAvatarGroup members={members} />
             </div>
 
             <div className="grow flex flex-col grow gap-5 p-5 bg-neutral-content overflow-x-hidden overflow-y-auto">
               <div className="flex gap-3" style={{ height: 400 }}>
                 <HoursAwayChart />
-              </div>
-
-              <div className="flex gap-5">
-                <Link
-                  href={`/org/${org._id}/report-absence`}
-                  className="btn btn-primary gap-2"
-                >
-                  Report absence
-                </Link>
-
-                <Link
-                  href={`/org/${org._id}/my-absence`}
-                  className="btn btn-secondary gap-2"
-                >
-                  View my absence
-                </Link>
               </div>
 
               <MemberTable members={members} />
@@ -138,14 +118,14 @@ export const getServerSideProps = withPageAuthRequired({
 
     const org = await getOrganizationById(new ObjectId(context.params.id));
 
-    if (!org) {
+    if ('error' in org) {
       context.res.writeHead(302, { Location: '/account' });
       return { props: { org: null, userId: null } };
     }
 
     const userId = await getUserIdByAuth0Id(session.user.sub);
 
-    if (!userId) {
+    if (typeof userId === 'object') {
       context.res.writeHead(302, { Location: '/account' });
       return { props: { org: null, userId: null } };
     }

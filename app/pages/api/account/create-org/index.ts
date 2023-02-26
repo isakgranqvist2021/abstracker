@@ -20,7 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const userId = await getUserIdByAuth0Id(session.user.sub);
 
-  if (!userId) {
+  if (typeof userId === 'object') {
     return res.status(500).end('Internal Server Error');
   }
 
