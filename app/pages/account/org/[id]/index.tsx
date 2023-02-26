@@ -42,6 +42,66 @@ ChartJS.register(
   Legend
 );
 
+type AdminViewProps = {
+  org: OrgModel;
+};
+
+function AdminView(props: AdminViewProps) {
+  const { org } = props;
+
+  const members = org.members;
+
+  return (
+    <div className="flex grow overflow-hidden">
+      <AddMemberModal orgId={org._id} />
+
+      <div className="grow flex flex-col">
+        <div className="flex justify-between gap-5 bg-neutral-content p-5 min-h-fit overflow-hidden items-center">
+          <label
+            htmlFor="add-member-modal"
+            className="btn btn-secondary gap-2 items-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+            Add member
+          </label>
+
+          <button className="btn btn-primary gap-2">Report absence</button>
+          <MembersAvatarGroup members={members} />
+        </div>
+
+        <div className="grow flex flex-col grow gap-5 p-5 bg-neutral-content overflow-x-hidden overflow-y-auto">
+          <div className="flex gap-3" style={{ height: 400 }}>
+            <HoursAwayChart />
+          </div>
+
+          <MemberTable members={members} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemberView() {
+  return (
+    <div className="flex grow overflow-hidden items-center justify-center">
+      <button className="btn btn-primary gap-2">Report absence</button>
+    </div>
+  );
+}
+
 export default function Org(props: OrgProps) {
   const { org, userId } = props;
 
@@ -49,7 +109,7 @@ export default function Org(props: OrgProps) {
     return null;
   }
 
-  const members = org.members;
+  const isAdmin = org.adminId === userId;
 
   return (
     <NavbarContainer
@@ -63,47 +123,7 @@ export default function Org(props: OrgProps) {
       </BreadCrumbs>
 
       <MainContainer>
-        <div className="flex grow overflow-hidden">
-          <AddMemberModal orgId={org._id} />
-
-          <div className="grow flex flex-col">
-            <div className="flex justify-between gap-5 bg-neutral-content p-5 min-h-fit overflow-hidden items-center">
-              {org.adminId === userId && (
-                <label
-                  htmlFor="add-member-modal"
-                  className="btn btn-secondary gap-2 items-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                  Add member
-                </label>
-              )}
-
-              <button className="btn btn-primary gap-2">Report absence</button>
-              <MembersAvatarGroup members={members} />
-            </div>
-
-            <div className="grow flex flex-col grow gap-5 p-5 bg-neutral-content overflow-x-hidden overflow-y-auto">
-              <div className="flex gap-3" style={{ height: 400 }}>
-                <HoursAwayChart />
-              </div>
-
-              <MemberTable members={members} />
-            </div>
-          </div>
-        </div>
+        {isAdmin ? <AdminView org={org} /> : <MemberView />}
       </MainContainer>
     </NavbarContainer>
   );
